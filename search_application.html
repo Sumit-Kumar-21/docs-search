@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise Asset Library</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .container { width: 80%; margin: 0 auto; }
+    .search-bar { margin: 20px 0; }
+    .search-bar input { width: 100%; padding: 10px; font-size: 18px; }
+    .search-results { margin-top: 20px; }
+    .result-item { border-bottom: 1px solid #ccc; padding: 10px 0; }
+    .result-item h2 { margin: 0 0 10px; }
+    .result-item p { margin: 5px 0; }
+    .highlight { background-color: yellow; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Enterprise Asset Library</h1>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Search for assets..." onkeyup="performSearch()" />
+    </div>
+    <div class="search-results" id="search-results">
+      <!-- Search results will appear here -->
+    </div>
+  </div>
+
+  <script>
+    async function performSearch() {
+      const query = document.getElementById('search-input').value;
+      if (query.length > 2) {
+        const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
+        const results = await response.json();
+        displayResults(results);
+      } else {
+        document.getElementById('search-results').innerHTML = '';
+      }
+    }
+
+    function displayResults(results) {
+      const resultsContainer = document.getElementById('search-results');
+      resultsContainer.innerHTML = '';
+      results.forEach(result => {
+        const item = document.createElement('div');
+        item.classList.add('result-item');
+        
+        item.innerHTML = `
+          <h2>${result.asset_name}</h2>
+          <p><strong>${result.field_name}:</strong> ${result.highlighted_value}</p>
+        `;
+        resultsContainer.appendChild(item);
+      });
+    }
+  </script>
+</body>
+</html>

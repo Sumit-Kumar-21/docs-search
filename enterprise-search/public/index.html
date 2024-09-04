@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise Asset Library</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .container { width: 80%; margin: 0 auto; }
+    .search-bar { margin: 20px 0; }
+    .search-bar input { width: 100%; padding: 10px; font-size: 18px; }
+    .search-results { margin-top: 20px; }
+    .result-item { border-bottom: 1px solid #ccc; padding: 10px 0; }
+    .result-item h2 { margin: 0 0 10px; }
+    .result-item p { margin: 5px 0; }
+    .highlight { background-color: yellow; }
+    .asset-type { font-weight: bold; }
+    .asset-name { margin-left: 20px; font-weight: bold; }
+    .field { margin-left: 40px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Enterprise Asset Library</h1>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Search for assets..." onkeyup="performSearch()" />
+    </div>
+    <div class="search-results" id="search-results">
+      <!-- Search results will appear here -->
+    </div>
+  </div>
+
+  <script>
+    async function performSearch() {
+      const query = document.getElementById('search-input').value;
+      if (query.length > 2) {
+        try {
+          const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          const results = await response.json();
+          displayResults(results);
+        } catch (error) {
+          console.error('Fetch error:', error);
+        }
+      } else {
+        document.getElementById('search-results').innerHTML = '';
+      }
+    }
+
+    function displayResults(results) {
+      const resultsContainer = document.getElementById('search-results');
+      resultsContainer.innerHTML = '';
+      for (const assetType in results) {
+        const typeSection = document.createElement('div');
+        typeSection.classList.add('result-item');
+        typeSection.innerHTML = `<h2 class="asset-type">${assetType}</h2>`;
+        
+        for (const assetName in results[assetType]) {
+          const nameSection = document.createElement('div');
+          nameSection.classList.add('result-item');
+          nameSection.innerHTML = `<h3 class="asset-name">${assetName}</h3>`;
+          
+          results[assetType][assetName].forEach(field => {
+            const fieldItem = document.createElement('div');
+            fieldItem.classList.add('result-item');
+            fieldItem.innerHTML = `
+              <p class="field"><strong>${field.field_name}:</strong> ${field.field_value}</p>
+            `;
+            nameSection.appendChild(fieldItem);
+          });
+          
+          typeSection.appendChild(nameSection);
+        }
+        
+        resultsContainer.appendChild(typeSection);
+      }
+    }
+  </script>
+</body>
+</html>
